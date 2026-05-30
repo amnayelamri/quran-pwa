@@ -1,5 +1,20 @@
 // ── Config ──────────────────────────────────────────────────────────────────
 const TOTAL_PAGES = 485;
+const TOTAL_HIZBS = 60;
+
+function hizbToPage(k) {
+  if (k === 1) return 1;
+  return 8 * k + 3;
+}
+
+function pageToHizb(page) {
+  if (page <= hizbToPage(2)) return 1;
+  // trouver le hizb courant (le plus grand k tel que hizbToPage(k) <= page)
+  for (let k = TOTAL_HIZBS; k >= 1; k--) {
+    if (hizbToPage(k) <= page) return k;
+  }
+  return 1;
+}
 
 // Detect environment
 const IS_GITHUB_PAGES = window.location.hostname.includes('github.io');
@@ -32,7 +47,8 @@ const imgPrev      = document.getElementById('img-prev');
 const imgCurr      = document.getElementById('img-curr');
 const imgNext      = document.getElementById('img-next');
 const spinner      = document.getElementById('loading-spinner');
-const pageNumber   = document.getElementById('page-number');
+const pageNumber      = document.getElementById('page-number');
+const hizbIndicator   = document.getElementById('hizb-indicator');
 const elementsPanel = document.getElementById('elements-panel');
 const elementsList  = document.getElementById('elements-list');
 const elementsEmpty = document.getElementById('elements-empty');
@@ -67,6 +83,7 @@ function loadPage(page) {
   if (page < TOTAL_PAGES) imgNext.src = PAGE_IMG_URL(page + 1);
 
   pageNumber.textContent = page;
+  hizbIndicator.textContent = `حزب ${pageToHizb(page)}`;
   document.title = `القرآن - صفحة ${page}`;
   currentPage = page;
   localStorage.setItem('quran-page', page);
@@ -108,6 +125,7 @@ function goTo(newPage, direction /* 'up'|'down' */) {
 
         currentPage = newPage;
         pageNumber.textContent = newPage;
+        hizbIndicator.textContent = `حزب ${pageToHizb(newPage)}`;
         document.title = `القرآن - صفحة ${newPage}`;
         localStorage.setItem('quran-page', newPage);
 
@@ -261,14 +279,15 @@ document.getElementById('main-container').addEventListener('click', () => {
 document.getElementById('btn-prev').addEventListener('click', prevPage);
 document.getElementById('btn-next').addEventListener('click', nextPage);
 document.getElementById('btn-goto').addEventListener('click', () => {
-  gotoInput.value = currentPage;
+  gotoInput.value = pageToHizb(currentPage);
   gotoModal.classList.remove('hidden');
   gotoInput.focus();
 });
 
 document.getElementById('goto-confirm').addEventListener('click', () => {
-  const p = parseInt(gotoInput.value);
-  if (p >= 1 && p <= TOTAL_PAGES) {
+  const k = parseInt(gotoInput.value);
+  if (k >= 1 && k <= TOTAL_HIZBS) {
+    const p = hizbToPage(k);
     goTo(p, p > currentPage ? 'down' : 'up');
     gotoModal.classList.add('hidden');
   }

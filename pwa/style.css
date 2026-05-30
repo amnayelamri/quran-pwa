@@ -136,6 +136,12 @@ body::before {
   letter-spacing: 2px;
 }
 
+.hizb-indicator {
+  font-size: 11px;
+  color: rgba(200,169,81,0.6);
+  letter-spacing: 1px;
+}
+
 /* ── Main container ── */
 #main-container {
   flex: 1;
