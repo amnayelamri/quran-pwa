@@ -47,6 +47,9 @@ app.get('/api/info', (_req, res) => {
 
 // ── API ───────────────────────────────────────────────────────────────────────
 
+// GET tout le fichier elements.json (pour publication GitHub)
+app.get('/api/all-elements', (_req, res) => res.json(readDB()));
+
 // GET all elements for a page
 app.get('/api/elements/:page', (req, res) => {
   const db = readDB();

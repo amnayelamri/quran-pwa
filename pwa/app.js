@@ -12,10 +12,13 @@ const PAGE_IMG_URL = (n) => {
     : `http://${window.location.hostname === 'localhost' ? 'localhost' : window.location.hostname}:3001/pages/${file}`;
 };
 
-// API URL — null on GitHub Pages (fallback to localStorage)
+// API URL
 const API_BASE = IS_GITHUB_PAGES
   ? null
   : `http://${window.location.hostname === 'localhost' ? 'localhost' : window.location.hostname}:3001/api`;
+
+// Sur GitHub Pages : URL du fichier elements.json publié
+const ELEMENTS_JSON_URL = IS_GITHUB_PAGES ? '../data/elements.json' : null;
 
 // ── State ────────────────────────────────────────────────────────────────────
 let currentPage = parseInt(localStorage.getItem('quran-page') || '1');
@@ -95,12 +98,25 @@ function nextPage() { goTo(currentPage + 1, 'down'); }
 function prevPage() { goTo(currentPage - 1, 'up'); }
 
 // ── Elements panel ───────────────────────────────────────────────────────────
+// Cache global du fichier elements.json (GitHub Pages)
+let _allElementsCache = null;
+async function getAllElements() {
+  if (_allElementsCache) return _allElementsCache;
+  try {
+    const res = await fetch(ELEMENTS_JSON_URL + '?t=' + Date.now());
+    if (!res.ok) throw new Error();
+    _allElementsCache = await res.json();
+    return _allElementsCache;
+  } catch {
+    return {};
+  }
+}
+
 async function fetchElements(page) {
-  if (elementsCache[page]) return elementsCache[page];
-  // On GitHub Pages : lire depuis localStorage (ajouts faits depuis le dashboard local)
-  if (!API_BASE) {
-    const stored = localStorage.getItem(`elements-${page}`);
-    const data = stored ? JSON.parse(stored) : [];
+  if (elementsCache[page] !== undefined) return elementsCache[page];
+  if (IS_GITHUB_PAGES) {
+    const all  = await getAllElements();
+    const data = all[page] || [];
     elementsCache[page] = data;
     return data;
   }

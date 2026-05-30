@@ -15,10 +15,16 @@
     header {
       background: var(--green); color: var(--gold);
       padding: 16px 24px; display: flex; align-items: center; gap: 16px;
-      border-bottom: 3px solid var(--gold);
+      border-bottom: 3px solid var(--gold); flex-wrap: wrap;
     }
     header h1 { font-size: 20px; }
-    header span { font-size: 13px; opacity: 0.7; }
+    header span { font-size: 13px; opacity: 0.7; flex: 1; }
+    .publish-btn {
+      background: var(--gold); color: #000; border: none;
+      padding: 9px 18px; border-radius: 8px; font-weight: bold;
+      font-size: 14px; cursor: pointer; white-space: nowrap;
+    }
+    .publish-btn:disabled { opacity: 0.5; cursor: wait; }
 
     .container { max-width: 900px; margin: 0 auto; padding: 24px; }
 
@@ -122,6 +128,7 @@
 <header>
   <h1>🗂 Dashboard — Quran PWA</h1>
   <span>Gérez les éléments par page</span>
+  <button class="publish-btn" id="publish-btn" onclick="publishToGitHub()">⬆ Publier sur GitHub</button>
 </header>
 
 <div class="container">
@@ -295,6 +302,70 @@ function esc(s) {
 
 // Init
 loadOverview();
+
+// ── Publier sur GitHub ────────────────────────────────────────────────────────
+const GH_OWNER = 'amnayelamri';
+const GH_REPO  = 'quran-pwa';
+const GH_FILE  = 'data/elements.json';
+
+async function publishToGitHub() {
+  const token = localStorage.getItem('gh-token');
+  if (!token) {
+    const t = prompt('Entrez votre GitHub Token (ghp_...) :\n(il sera sauvegardé localement)');
+    if (!t) return;
+    localStorage.setItem('gh-token', t.trim());
+    return publishToGitHub();
+  }
+
+  const btn = document.getElementById('publish-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Publication...';
+
+  try {
+    const headers = {
+      Authorization: `token ${token}`,
+      Accept: 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json'
+    };
+
+    // Récupérer le SHA actuel du fichier (nécessaire pour le mettre à jour)
+    let sha = '';
+    const getRes = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`, { headers });
+    if (getRes.ok) {
+      const meta = await getRes.json();
+      sha = meta.sha;
+    }
+
+    // Lire le contenu actuel de elements.json depuis le serveur local
+    const dataRes = await fetch('/api/all-elements');
+    const data = await dataRes.json();
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+
+    // Pousser sur GitHub
+    const body = JSON.stringify({
+      message: `Mise à jour des éléments - ${new Date().toLocaleString('fr-FR')}`,
+      content,
+      sha: sha || undefined
+    });
+
+    const putRes = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`, {
+      method: 'PUT', headers, body
+    });
+
+    if (!putRes.ok) {
+      const err = await putRes.json();
+      throw new Error(err.message);
+    }
+
+    toast('✅ Publié sur GitHub ! Visible sur téléphone dans ~1 min');
+  } catch (e) {
+    toast('❌ Erreur : ' + e.message);
+    if (e.message.includes('Bad credentials')) localStorage.removeItem('gh-token');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '⬆ Publier sur GitHub';
+  }
+}
 </script>
 </body>
 </html>
