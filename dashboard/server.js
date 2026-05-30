@@ -1,0 +1,121 @@
+const express = require('express');
+const cors    = require('cors');
+const fs      = require('fs');
+const path    = require('path');
+const multer  = require('multer');
+
+const app      = express();
+const PORT     = 3001;
+const DATA_DIR = path.join(__dirname, '..', 'data');
+const DB_FILE  = path.join(DATA_DIR, 'elements.json');
+const UPLOADS  = path.join(DATA_DIR, 'uploads');
+const PAGES    = path.join(DATA_DIR, 'pages');
+
+// ── Init storage ──────────────────────────────────────────────────────────────
+if (!fs.existsSync(DATA_DIR))  fs.mkdirSync(DATA_DIR,  { recursive: true });
+if (!fs.existsSync(UPLOADS))   fs.mkdirSync(UPLOADS,   { recursive: true });
+if (!fs.existsSync(DB_FILE))   fs.writeFileSync(DB_FILE, '{}');
+
+function readDB()       { return JSON.parse(fs.readFileSync(DB_FILE, 'utf8')); }
+function writeDB(data)  { fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2)); }
+
+// ── Multer (file uploads) ─────────────────────────────────────────────────────
+const storage = multer.diskStorage({
+  destination: UPLOADS,
+  filename: (_req, file, cb) => {
+    const unique = Date.now() + '-' + Math.round(Math.random() * 1e6);
+    cb(null, unique + path.extname(file.originalname));
+  }
+});
+const upload = multer({ storage, limits: { fileSize: 50 * 1024 * 1024 } });
+
+// ── Middleware ────────────────────────────────────────────────────────────────
+app.use(cors());
+app.use(express.json());
+app.use('/uploads', express.static(UPLOADS));
+app.use('/pages',   express.static(PAGES));
+app.use('/pwa',     express.static(path.join(__dirname, '..', 'pwa')));
+app.use('/dashboard', express.static(path.join(__dirname, 'public')));
+// Root → redirect to dashboard
+app.get('/', (_req, res) => res.redirect('/dashboard'));
+
+// GET page count
+app.get('/api/info', (_req, res) => {
+  const files = require('fs').readdirSync(PAGES).filter(f => f.endsWith('.jpg'));
+  res.json({ totalPages: files.length });
+});
+
+// ── API ───────────────────────────────────────────────────────────────────────
+
+// GET all elements for a page
+app.get('/api/elements/:page', (req, res) => {
+  const db = readDB();
+  res.json(db[req.params.page] || []);
+});
+
+// GET all pages that have elements (for dashboard overview)
+app.get('/api/pages', (req, res) => {
+  const db = readDB();
+  res.json(Object.keys(db).map(p => ({ page: parseInt(p), count: db[p].length })));
+});
+
+// POST add element to a page
+app.post('/api/elements/:page', upload.single('file'), (req, res) => {
+  const db   = readDB();
+  const page = req.params.page;
+  if (!db[page]) db[page] = [];
+
+  const { type, title, content } = req.body;
+  const element = {
+    id:      Date.now().toString(),
+    type,
+    title:   title   || '',
+    content: content || '',
+    url:     '',
+    createdAt: new Date().toISOString()
+  };
+
+  if (req.file) {
+    element.url = `/uploads/${req.file.filename}`;
+  } else if (req.body.url) {
+    element.url = req.body.url;
+  }
+
+  db[page].push(element);
+  writeDB(db);
+  res.json(element);
+});
+
+// DELETE element
+app.delete('/api/elements/:page/:id', (req, res) => {
+  const db   = readDB();
+  const page = req.params.page;
+  if (!db[page]) return res.json({ ok: true });
+  db[page] = db[page].filter(e => e.id !== req.params.id);
+  if (db[page].length === 0) delete db[page];
+  writeDB(db);
+  res.json({ ok: true });
+});
+
+// PUT update element order (drag-to-reorder)
+app.put('/api/elements/:page/reorder', (req, res) => {
+  const db   = readDB();
+  const page = req.params.page;
+  db[page]   = req.body.ids.map(id => (db[page] || []).find(e => e.id === id)).filter(Boolean);
+  writeDB(db);
+  res.json({ ok: true });
+});
+
+// ── Start ─────────────────────────────────────────────────────────────────────
+app.listen(PORT, '0.0.0.0', () => {
+  const os      = require('os');
+  const ifaces  = os.networkInterfaces();
+  let localIP   = 'localhost';
+  Object.values(ifaces).flat().forEach(i => {
+    if (i.family === 'IPv4' && !i.internal) localIP = i.address;
+  });
+  console.log(`\n✅  Dashboard lancé`);
+  console.log(`   Dashboard : http://localhost:${PORT}`);
+  console.log(`   PWA (téléphone) : http://${localIP}:${PORT}\n`);
+  console.log(`   → Dans app.js de la PWA, remplacez localhost par ${localIP}`);
+});

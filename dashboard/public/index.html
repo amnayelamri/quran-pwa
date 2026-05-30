@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - Quran PWA</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green: #1a4a2e; --gold: #c8a951; --bg: #f4f1eb;
+      --card: #fff; --border: #ddd; --text: #222;
+    }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    header {
+      background: var(--green); color: var(--gold);
+      padding: 16px 24px; display: flex; align-items: center; gap: 16px;
+      border-bottom: 3px solid var(--gold);
+    }
+    header h1 { font-size: 20px; }
+    header span { font-size: 13px; opacity: 0.7; }
+
+    .container { max-width: 900px; margin: 0 auto; padding: 24px; }
+
+    /* Page selector */
+    .page-selector {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px; margin-bottom: 24px;
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .page-selector label { font-weight: bold; color: var(--green); }
+    .page-selector input {
+      width: 100px; padding: 8px 12px; border: 2px solid var(--gold);
+      border-radius: 8px; font-size: 16px; text-align: center;
+    }
+    .page-selector button {
+      padding: 8px 20px; background: var(--green); color: var(--gold);
+      border: none; border-radius: 8px; cursor: pointer; font-weight: bold;
+    }
+    #page-badge {
+      background: var(--gold); color: #000; border-radius: 20px;
+      padding: 4px 14px; font-size: 13px; font-weight: bold;
+    }
+
+    /* Add element form */
+    .add-form {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px; margin-bottom: 24px;
+    }
+    .add-form h2 { color: var(--green); margin-bottom: 16px; font-size: 16px; }
+
+    .form-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+    .form-row select, .form-row input, .form-row textarea {
+      flex: 1; min-width: 160px; padding: 9px 12px;
+      border: 1px solid var(--border); border-radius: 8px; font-size: 14px;
+    }
+    textarea { resize: vertical; min-height: 80px; }
+
+    #file-upload-row { display: none; }
+    #url-row { display: none; }
+
+    .add-btn {
+      width: 100%; padding: 12px; background: var(--green); color: var(--gold);
+      border: none; border-radius: 8px; font-size: 15px; font-weight: bold;
+      cursor: pointer; margin-top: 4px;
+    }
+    .add-btn:hover { opacity: 0.9; }
+
+    /* Elements list */
+    .elements-section h2 { color: var(--green); margin-bottom: 14px; font-size: 16px; }
+    .el-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px 16px; margin-bottom: 10px;
+      display: flex; gap: 14px; align-items: flex-start;
+    }
+    .el-icon {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: var(--green); color: var(--gold);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .el-info { flex: 1; }
+    .el-info .el-type { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+    .el-info .el-title { font-weight: bold; margin: 2px 0 4px; }
+    .el-info .el-content { font-size: 13px; color: #555; }
+    .el-info .el-url { font-size: 12px; color: var(--green); word-break: break-all; }
+    .del-btn {
+      background: none; border: none; color: #c00; cursor: pointer;
+      font-size: 20px; line-height: 1; padding: 2px 6px; border-radius: 4px;
+    }
+    .del-btn:hover { background: #fee; }
+
+    .no-elements { text-align: center; color: #aaa; padding: 30px; font-size: 14px; }
+
+    /* Pages overview */
+    .overview {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px; margin-bottom: 24px;
+    }
+    .overview h2 { color: var(--green); margin-bottom: 14px; font-size: 16px; }
+    .pages-grid {
+      display: flex; flex-wrap: wrap; gap: 8px;
+    }
+    .page-chip {
+      background: var(--green); color: var(--gold);
+      padding: 5px 14px; border-radius: 20px; font-size: 13px;
+      cursor: pointer; border: none; font-weight: bold;
+    }
+    .page-chip:hover { opacity: 0.8; }
+
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: var(--green); color: var(--gold);
+      padding: 10px 24px; border-radius: 24px; font-size: 14px;
+      opacity: 0; transition: opacity 0.3s; pointer-events: none;
+      border: 1px solid var(--gold);
+    }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>🗂 Dashboard — Quran PWA</h1>
+  <span>Gérez les éléments par page</span>
+</header>
+
+<div class="container">
+
+  <!-- Pages with elements -->
+  <div class="overview">
+    <h2>Pages avec des éléments</h2>
+    <div class="pages-grid" id="pages-grid"><em style="color:#aaa;font-size:13px">Aucune page</em></div>
+  </div>
+
+  <!-- Page selector -->
+  <div class="page-selector">
+    <label>Sélectionner la page :</label>
+    <input type="number" id="page-input" min="1" max="604" value="1" />
+    <button onclick="loadPage()">Charger</button>
+    <span id="page-badge">Page 1</span>
+  </div>
+
+  <!-- Add form -->
+  <div class="add-form">
+    <h2>Ajouter un élément à la page <span id="form-page-num">1</span></h2>
+
+    <div class="form-row">
+      <select id="el-type" onchange="onTypeChange()">
+        <option value="note">📝 Note</option>
+        <option value="audio">🔊 Audio</option>
+        <option value="image">🖼 Image</option>
+        <option value="link">🔗 Lien</option>
+      </select>
+      <input type="text" id="el-title" placeholder="Titre (optionnel)" />
+    </div>
+
+    <div class="form-row">
+      <textarea id="el-content" placeholder="Contenu / description..."></textarea>
+    </div>
+
+    <div class="form-row" id="url-row">
+      <input type="text" id="el-url" placeholder="URL (lien, YouTube, image en ligne...)" />
+    </div>
+
+    <div class="form-row" id="file-upload-row">
+      <input type="file" id="el-file" accept="audio/*,image/*" />
+    </div>
+
+    <button class="add-btn" onclick="addElement()">＋ Ajouter</button>
+  </div>
+
+  <!-- Elements of selected page -->
+  <div class="elements-section">
+    <h2>Éléments de la page <span id="list-page-num">1</span></h2>
+    <div id="elements-list"><div class="no-elements">Chargez une page pour voir ses éléments</div></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let currentPage = 1;
+const API = 'http://localhost:3001/api';
+
+const typeIcons = { note: '📝', audio: '🔊', image: '🖼', link: '🔗' };
+const typeNames = { note: 'Note', audio: 'Audio', image: 'Image', link: 'Lien' };
+
+function onTypeChange() {
+  const t = document.getElementById('el-type').value;
+  document.getElementById('file-upload-row').style.display = (t === 'audio' || t === 'image') ? '' : 'none';
+  document.getElementById('url-row').style.display          = (t === 'link'  || t === 'image') ? '' : 'none';
+}
+
+async function loadPage() {
+  const p = parseInt(document.getElementById('page-input').value);
+  if (p < 1 || p > 604) return toast('Page invalide (1-604)');
+  currentPage = p;
+  document.getElementById('page-badge').textContent    = `Page ${p}`;
+  document.getElementById('form-page-num').textContent = p;
+  document.getElementById('list-page-num').textContent = p;
+  await renderElements();
+}
+
+async function renderElements() {
+  const res  = await fetch(`${API}/elements/${currentPage}`);
+  const list = await res.json();
+  const el   = document.getElementById('elements-list');
+
+  if (list.length === 0) {
+    el.innerHTML = '<div class="no-elements">Aucun élément pour cette page</div>';
+    return;
+  }
+
+  el.innerHTML = list.map(e => `
+    <div class="el-card" id="card-${e.id}">
+      <div class="el-icon">${typeIcons[e.type] || '?'}</div>
+      <div class="el-info">
+        <div class="el-type">${typeNames[e.type] || e.type}</div>
+        ${e.title   ? `<div class="el-title">${esc(e.title)}</div>` : ''}
+        ${e.content ? `<div class="el-content">${esc(e.content)}</div>` : ''}
+        ${e.url     ? `<div class="el-url">${esc(e.url)}</div>` : ''}
+      </div>
+      <button class="del-btn" onclick="deleteElement('${e.id}')" title="Supprimer">×</button>
+    </div>
+  `).join('');
+}
+
+async function addElement() {
+  const type    = document.getElementById('el-type').value;
+  const title   = document.getElementById('el-title').value.trim();
+  const content = document.getElementById('el-content').value.trim();
+  const url     = document.getElementById('el-url').value.trim();
+  const file    = document.getElementById('el-file').files[0];
+
+  const fd = new FormData();
+  fd.append('type', type);
+  fd.append('title', title);
+  fd.append('content', content);
+  if (file)      fd.append('file', file);
+  else if (url)  fd.append('url', url);
+
+  await fetch(`${API}/elements/${currentPage}`, { method: 'POST', body: fd });
+
+  // Reset form
+  document.getElementById('el-title').value   = '';
+  document.getElementById('el-content').value = '';
+  document.getElementById('el-url').value     = '';
+  document.getElementById('el-file').value    = '';
+
+  toast('Élément ajouté ✓');
+  await renderElements();
+  await loadOverview();
+}
+
+async function deleteElement(id) {
+  if (!confirm('Supprimer cet élément ?')) return;
+  await fetch(`${API}/elements/${currentPage}/${id}`, { method: 'DELETE' });
+  toast('Élément supprimé');
+  await renderElements();
+  await loadOverview();
+}
+
+async function loadOverview() {
+  const res   = await fetch(`${API}/pages`);
+  const pages = await res.json();
+  const grid  = document.getElementById('pages-grid');
+  if (pages.length === 0) {
+    grid.innerHTML = '<em style="color:#aaa;font-size:13px">Aucune page</em>';
+    return;
+  }
+  grid.innerHTML = pages
+    .sort((a,b) => a.page - b.page)
+    .map(p => `<button class="page-chip" onclick="jumpTo(${p.page})">P${p.page} (${p.count})</button>`)
+    .join('');
+}
+
+function jumpTo(p) {
+  document.getElementById('page-input').value = p;
+  loadPage();
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Init
+loadOverview();
+</script>
+</body>
+</html>
