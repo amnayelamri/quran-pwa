@@ -204,8 +204,8 @@ document.addEventListener('touchend', (e) => {
   }
 
   if (swipeAxis === 'h' && Math.abs(dx) > minSwipe) {
-    if (!panelOpen && dx < 0) openPanel();  // swipe left → open panel
-    if (panelOpen  && dx > 0) closePanel(); // swipe right → close panel
+    if (!panelOpen && dx > 0) openPanel();  // swipe right → open panel (RTL)
+    if (panelOpen  && dx < 0) closePanel(); // swipe left  → close panel
   }
 });
 
@@ -244,8 +244,8 @@ document.addEventListener('keydown', (e) => {
   if (gotoModal.classList.contains('hidden')) {
     if (e.key === 'ArrowDown' || e.key === 'PageDown') nextPage();
     if (e.key === 'ArrowUp'   || e.key === 'PageUp')   prevPage();
-    if (e.key === 'ArrowLeft')  panelOpen ? closePanel() : openPanel();
-    if (e.key === 'ArrowRight') closePanel();
+    if (e.key === 'ArrowRight') panelOpen ? closePanel() : openPanel();
+    if (e.key === 'ArrowLeft')  closePanel();
     if (e.key === 'Escape')     closePanel();
   }
 });
