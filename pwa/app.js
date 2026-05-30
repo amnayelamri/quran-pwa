@@ -204,8 +204,8 @@ document.addEventListener('touchend', (e) => {
   }
 
   if (swipeAxis === 'h' && Math.abs(dx) > minSwipe) {
-    if (!panelOpen && dx > 0) openPanel();  // swipe right → open panel (RTL)
-    if (panelOpen  && dx < 0) closePanel(); // swipe left  → close panel
+    if (!panelOpen && dx < 0) openPanel();  // swipe left → open panel (depuis droite)
+    if (panelOpen  && dx > 0) closePanel(); // swipe right → close panel
   }
 });
 
