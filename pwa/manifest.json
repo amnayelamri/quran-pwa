@@ -1,16 +1,17 @@
 {
   "name": "القرآن الكريم",
   "short_name": "القرآن",
-  "description": "تطبيق القرآن الكريم",
-  "start_url": "/",
+  "description": "مصحف التجويد الملون",
+  "start_url": "/quran-pwa/pwa/index.html",
+  "scope": "/quran-pwa/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0d2418",
+  "background_color": "#0f2d1b",
   "theme_color": "#1a4a2e",
   "lang": "ar",
   "dir": "rtl",
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "/quran-pwa/pwa/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/quran-pwa/pwa/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }
