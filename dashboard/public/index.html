@@ -1,185 +1,389 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard - Quran PWA</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — القرآن الكريم</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     :root {
-      --green: #1a4a2e; --gold: #c8a951; --bg: #f4f1eb;
-      --card: #fff; --border: #ddd; --text: #222;
+      --green:   #1a4a2e;
+      --green2:  #0f2d1b;
+      --green3:  #112a1e;
+      --gold:    #c8a951;
+      --gold2:   #e8c97a;
+      --bg:      #0e1f14;
+      --surface: #132b1c;
+      --surface2:#1a3824;
+      --border:  rgba(200,169,81,0.18);
+      --text:    #f0e6c8;
+      --muted:   rgba(240,230,200,0.55);
+      --red:     #c0392b;
     }
-    body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* motif géométrique fond */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background-image:
+        repeating-linear-gradient(60deg,  transparent, transparent 34px, rgba(200,169,81,0.03) 34px, rgba(200,169,81,0.03) 35px),
+        repeating-linear-gradient(-60deg, transparent, transparent 34px, rgba(200,169,81,0.03) 34px, rgba(200,169,81,0.03) 35px);
+    }
+
+    /* ── Header ── */
     header {
-      background: var(--green); color: var(--gold);
-      padding: 16px 24px; display: flex; align-items: center; gap: 16px;
-      border-bottom: 3px solid var(--gold); flex-wrap: wrap;
+      position: relative; z-index: 1;
+      background: linear-gradient(135deg, #0a1d0f 0%, #1a4a2e 50%, #0a1d0f 100%);
+      padding: 0 32px;
+      height: 68px;
+      display: flex; align-items: center; gap: 20px;
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 4px 30px rgba(0,0,0,0.5);
     }
-    header h1 { font-size: 20px; }
-    header span { font-size: 13px; opacity: 0.7; flex: 1; }
-    .publish-btn {
-      background: var(--gold); color: #000; border: none;
-      padding: 9px 18px; border-radius: 8px; font-weight: bold;
-      font-size: 14px; cursor: pointer; white-space: nowrap;
+    header::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold) 25%, var(--gold2) 50%, var(--gold) 75%, transparent);
     }
-    .publish-btn:disabled { opacity: 0.5; cursor: wait; }
 
-    .container { max-width: 900px; margin: 0 auto; padding: 24px; }
+    .header-logo {
+      font-size: 26px;
+      line-height: 1;
+      filter: drop-shadow(0 0 8px rgba(200,169,81,0.5));
+    }
+    .header-title { flex: 1; }
+    .header-title h1 {
+      font-size: 17px; font-weight: 600;
+      color: var(--gold); letter-spacing: 0.5px;
+    }
+    .header-title p {
+      font-size: 12px; color: var(--muted); margin-top: 2px;
+    }
+
+    .publish-btn {
+      display: flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, var(--gold), var(--gold2));
+      color: #0a1d0f; border: none;
+      padding: 10px 20px; border-radius: 10px;
+      font-weight: 700; font-size: 13px;
+      cursor: pointer; white-space: nowrap;
+      box-shadow: 0 4px 14px rgba(200,169,81,0.25);
+      transition: all 0.2s;
+    }
+    .publish-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(200,169,81,0.35); }
+    .publish-btn:disabled { opacity: 0.5; cursor: wait; transform: none; }
+
+    /* ── Layout ── */
+    .container {
+      position: relative; z-index: 1;
+      max-width: 960px; margin: 0 auto; padding: 28px 24px;
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      grid-template-rows: auto auto 1fr;
+      gap: 20px;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .card-header .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: rgba(200,169,81,0.12);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .card-header h2 {
+      font-size: 14px; font-weight: 600;
+      color: var(--gold); letter-spacing: 0.5px;
+    }
+    .card-header span { font-size: 12px; color: var(--muted); }
+    .card-body { padding: 18px 20px; }
+
+    /* ── Overview (full width) ── */
+    .overview { grid-column: 1 / -1; }
+    .pages-grid { display: flex; flex-wrap: wrap; gap: 8px; min-height: 32px; }
+    .page-chip {
+      background: rgba(200,169,81,0.1);
+      border: 1px solid rgba(200,169,81,0.3);
+      color: var(--gold2);
+      padding: 5px 14px; border-radius: 20px;
+      font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .page-chip:hover { background: rgba(200,169,81,0.2); transform: translateY(-1px); }
+    .no-pages { color: var(--muted); font-size: 13px; font-style: italic; }
+
+    /* ── Sidebar (left column) ── */
+    .sidebar { grid-column: 1; display: flex; flex-direction: column; gap: 20px; }
 
     /* Page selector */
-    .page-selector {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 12px; padding: 20px; margin-bottom: 24px;
-      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    .page-nav {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
     }
-    .page-selector label { font-weight: bold; color: var(--green); }
-    .page-selector input {
-      width: 100px; padding: 8px 12px; border: 2px solid var(--gold);
-      border-radius: 8px; font-size: 16px; text-align: center;
+    .page-nav input {
+      width: 80px; padding: 10px 12px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text);
+      font-size: 16px; text-align: center; outline: none;
+      transition: border-color 0.2s;
     }
-    .page-selector button {
-      padding: 8px 20px; background: var(--green); color: var(--gold);
-      border: none; border-radius: 8px; cursor: pointer; font-weight: bold;
+    .page-nav input:focus { border-color: var(--gold); }
+    .page-nav button {
+      flex: 1; padding: 10px 16px;
+      background: var(--green); color: var(--gold);
+      border: 1px solid rgba(200,169,81,0.3);
+      border-radius: 10px; font-weight: 600; font-size: 14px;
+      cursor: pointer; transition: all 0.2s;
     }
+    .page-nav button:hover { background: #1f5a37; }
     #page-badge {
-      background: var(--gold); color: #000; border-radius: 20px;
-      padding: 4px 14px; font-size: 13px; font-weight: bold;
+      width: 100%; text-align: center;
+      font-size: 13px; color: var(--muted);
+      padding: 6px 0 0;
     }
+    #page-badge strong { color: var(--gold); }
 
-    /* Add element form */
-    .add-form {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 12px; padding: 20px; margin-bottom: 24px;
+    /* Add form */
+    .form-group { margin-bottom: 14px; }
+    .form-group label {
+      display: block; font-size: 11px; font-weight: 600;
+      color: var(--muted); text-transform: uppercase;
+      letter-spacing: 1px; margin-bottom: 6px;
     }
-    .add-form h2 { color: var(--green); margin-bottom: 16px; font-size: 16px; }
-
-    .form-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
-    .form-row select, .form-row input, .form-row textarea {
-      flex: 1; min-width: 160px; padding: 9px 12px;
-      border: 1px solid var(--border); border-radius: 8px; font-size: 14px;
+    .form-group select,
+    .form-group input[type=text],
+    .form-group textarea {
+      width: 100%; padding: 10px 13px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text);
+      font-size: 14px; outline: none;
+      transition: border-color 0.2s;
+      font-family: inherit;
     }
-    textarea { resize: vertical; min-height: 80px; }
-
-    #file-upload-row { display: none; }
-    #url-row { display: none; }
+    .form-group select:focus,
+    .form-group input:focus,
+    .form-group textarea:focus { border-color: var(--gold); }
+    .form-group select { cursor: pointer; }
+    textarea { resize: vertical; min-height: 75px; line-height: 1.5; }
+    .form-group input[type=file] {
+      width: 100%; padding: 8px;
+      background: var(--surface2); border: 1px dashed rgba(200,169,81,0.3);
+      border-radius: 10px; color: var(--muted);
+      font-size: 13px; cursor: pointer;
+    }
+    #file-upload-row, #url-row { display: none; }
 
     .add-btn {
-      width: 100%; padding: 12px; background: var(--green); color: var(--gold);
-      border: none; border-radius: 8px; font-size: 15px; font-weight: bold;
-      cursor: pointer; margin-top: 4px;
+      width: 100%; padding: 12px;
+      background: linear-gradient(135deg, var(--green), #236b3f);
+      border: 1px solid rgba(200,169,81,0.3);
+      color: var(--gold); border-radius: 10px;
+      font-size: 14px; font-weight: 700;
+      cursor: pointer; letter-spacing: 0.5px;
+      transition: all 0.2s; margin-top: 4px;
     }
-    .add-btn:hover { opacity: 0.9; }
+    .add-btn:hover { background: linear-gradient(135deg, #236b3f, #2a7a48); transform: translateY(-1px); }
 
-    /* Elements list */
-    .elements-section h2 { color: var(--green); margin-bottom: 14px; font-size: 16px; }
+    /* ── Main area (elements list) ── */
+    .main-area { grid-column: 2; }
     .el-card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 10px; padding: 14px 16px; margin-bottom: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px;
+      margin-bottom: 12px;
       display: flex; gap: 14px; align-items: flex-start;
+      transition: border-color 0.2s;
+      position: relative; overflow: hidden;
     }
+    .el-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0;
+      width: 3px; height: 100%;
+      background: linear-gradient(180deg, var(--gold2), var(--gold));
+    }
+    .el-card:hover { border-color: rgba(200,169,81,0.35); }
+
     .el-icon {
-      width: 38px; height: 38px; border-radius: 50%;
-      background: var(--green); color: var(--gold);
+      width: 40px; height: 40px; border-radius: 10px;
+      background: rgba(200,169,81,0.1);
+      border: 1px solid rgba(200,169,81,0.2);
       display: flex; align-items: center; justify-content: center;
-      font-size: 18px; flex-shrink: 0;
+      font-size: 18px; flex-shrink: 0; margin-left: 6px;
     }
-    .el-info { flex: 1; }
-    .el-info .el-type { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
-    .el-info .el-title { font-weight: bold; margin: 2px 0 4px; }
-    .el-info .el-content { font-size: 13px; color: #555; }
-    .el-info .el-url { font-size: 12px; color: var(--green); word-break: break-all; }
+    .el-info { flex: 1; min-width: 0; }
+    .el-info .el-badge {
+      display: inline-block; font-size: 10px; font-weight: 700;
+      color: var(--gold); background: rgba(200,169,81,0.1);
+      border: 1px solid rgba(200,169,81,0.2);
+      padding: 2px 8px; border-radius: 20px;
+      text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: 5px;
+    }
+    .el-info .el-title {
+      font-weight: 600; font-size: 15px; color: var(--text);
+      margin-bottom: 4px; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis;
+    }
+    .el-info .el-content { font-size: 13px; color: var(--muted); line-height: 1.6; }
+    .el-info .el-url {
+      font-size: 12px; color: var(--gold2);
+      word-break: break-all; margin-top: 4px;
+    }
+
     .del-btn {
-      background: none; border: none; color: #c00; cursor: pointer;
-      font-size: 20px; line-height: 1; padding: 2px 6px; border-radius: 4px;
+      background: rgba(192,57,43,0.1); border: 1px solid rgba(192,57,43,0.2);
+      color: var(--red); cursor: pointer;
+      width: 32px; height: 32px; border-radius: 8px;
+      font-size: 18px; line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: all 0.2s;
     }
-    .del-btn:hover { background: #fee; }
+    .del-btn:hover { background: rgba(192,57,43,0.25); }
 
-    .no-elements { text-align: center; color: #aaa; padding: 30px; font-size: 14px; }
+    .no-elements {
+      text-align: center; padding: 50px 20px;
+      color: var(--muted); font-size: 14px;
+    }
+    .no-elements::before {
+      content: '✦';
+      display: block; font-size: 30px; margin-bottom: 14px;
+      color: rgba(200,169,81,0.2);
+    }
 
-    /* Pages overview */
-    .overview {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 12px; padding: 20px; margin-bottom: 24px;
-    }
-    .overview h2 { color: var(--green); margin-bottom: 14px; font-size: 16px; }
-    .pages-grid {
-      display: flex; flex-wrap: wrap; gap: 8px;
-    }
-    .page-chip {
-      background: var(--green); color: var(--gold);
-      padding: 5px 14px; border-radius: 20px; font-size: 13px;
-      cursor: pointer; border: none; font-weight: bold;
-    }
-    .page-chip:hover { opacity: 0.8; }
-
+    /* ── Toast ── */
     .toast {
-      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-      background: var(--green); color: var(--gold);
-      padding: 10px 24px; border-radius: 24px; font-size: 14px;
-      opacity: 0; transition: opacity 0.3s; pointer-events: none;
-      border: 1px solid var(--gold);
+      position: fixed; bottom: 28px; left: 50%;
+      transform: translateX(-50%);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 24px; border-radius: 30px;
+      font-size: 14px; font-weight: 500;
+      opacity: 0; transition: opacity 0.3s;
+      pointer-events: none; z-index: 999;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+      white-space: nowrap;
     }
     .toast.show { opacity: 1; }
+
+    @media (max-width: 700px) {
+      .container { grid-template-columns: 1fr; }
+      .overview, .main-area { grid-column: 1; }
+      header { padding: 0 16px; }
+    }
   </style>
 </head>
 <body>
+
 <header>
-  <h1>🗂 Dashboard — Quran PWA</h1>
-  <span>Gérez les éléments par page</span>
-  <button class="publish-btn" id="publish-btn" onclick="publishToGitHub()">⬆ Publier sur GitHub</button>
+  <div class="header-logo">☽</div>
+  <div class="header-title">
+    <h1>Dashboard — القرآن الكريم</h1>
+    <p>Gérez les annotations par page du mushaf</p>
+  </div>
+  <button class="publish-btn" id="publish-btn" onclick="publishToGitHub()">
+    <span>⬆</span> Publier sur GitHub
+  </button>
 </header>
 
 <div class="container">
 
-  <!-- Pages with elements -->
-  <div class="overview">
-    <h2>Pages avec des éléments</h2>
-    <div class="pages-grid" id="pages-grid"><em style="color:#aaa;font-size:13px">Aucune page</em></div>
+  <!-- Vue d'ensemble -->
+  <div class="card overview">
+    <div class="card-header">
+      <div class="icon">📖</div>
+      <h2>Pages annotées</h2>
+      <span id="overview-count"></span>
+    </div>
+    <div class="card-body">
+      <div class="pages-grid" id="pages-grid">
+        <span class="no-pages">Aucune annotation pour l'instant</span>
+      </div>
+    </div>
   </div>
 
-  <!-- Page selector -->
-  <div class="page-selector">
-    <label>Sélectionner la page :</label>
-    <input type="number" id="page-input" min="1" max="604" value="1" />
-    <button onclick="loadPage()">Charger</button>
-    <span id="page-badge">Page 1</span>
+  <!-- Colonne gauche -->
+  <div class="sidebar">
+
+    <!-- Sélecteur de page -->
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">🔢</div>
+        <h2>Page du mushaf</h2>
+      </div>
+      <div class="card-body">
+        <div class="page-nav">
+          <input type="number" id="page-input" min="1" max="485" value="1"/>
+          <button onclick="loadPage()">Charger</button>
+        </div>
+        <div id="page-badge">Page <strong>1</strong> / 485</div>
+      </div>
+    </div>
+
+    <!-- Formulaire d'ajout -->
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">＋</div>
+        <h2>Ajouter un élément</h2>
+      </div>
+      <div class="card-body">
+        <div class="form-group">
+          <label>Type</label>
+          <select id="el-type" onchange="onTypeChange()">
+            <option value="note">📝 Note / Tafsir</option>
+            <option value="audio">🔊 Audio</option>
+            <option value="image">🖼 Image</option>
+            <option value="link">🔗 Lien</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Titre</label>
+          <input type="text" id="el-title" placeholder="Titre (optionnel)"/>
+        </div>
+        <div class="form-group">
+          <label>Contenu</label>
+          <textarea id="el-content" placeholder="Texte, description, explication..."></textarea>
+        </div>
+        <div class="form-group" id="url-row">
+          <label>URL</label>
+          <input type="text" id="el-url" placeholder="https://..."/>
+        </div>
+        <div class="form-group" id="file-upload-row">
+          <label>Fichier</label>
+          <input type="file" id="el-file" accept="audio/*,image/*"/>
+        </div>
+        <button class="add-btn" onclick="addElement()">＋ Ajouter à la page <span id="form-page-num">1</span></button>
+      </div>
+    </div>
+
   </div>
 
-  <!-- Add form -->
-  <div class="add-form">
-    <h2>Ajouter un élément à la page <span id="form-page-num">1</span></h2>
-
-    <div class="form-row">
-      <select id="el-type" onchange="onTypeChange()">
-        <option value="note">📝 Note</option>
-        <option value="audio">🔊 Audio</option>
-        <option value="image">🖼 Image</option>
-        <option value="link">🔗 Lien</option>
-      </select>
-      <input type="text" id="el-title" placeholder="Titre (optionnel)" />
+  <!-- Zone principale : liste des éléments -->
+  <div class="card main-area">
+    <div class="card-header">
+      <div class="icon">📌</div>
+      <h2>Éléments — page <span id="list-page-num">1</span></h2>
     </div>
-
-    <div class="form-row">
-      <textarea id="el-content" placeholder="Contenu / description..."></textarea>
+    <div class="card-body" id="elements-list">
+      <div class="no-elements">Sélectionnez une page pour voir ses éléments</div>
     </div>
-
-    <div class="form-row" id="url-row">
-      <input type="text" id="el-url" placeholder="URL (lien, YouTube, image en ligne...)" />
-    </div>
-
-    <div class="form-row" id="file-upload-row">
-      <input type="file" id="el-file" accept="audio/*,image/*" />
-    </div>
-
-    <button class="add-btn" onclick="addElement()">＋ Ajouter</button>
-  </div>
-
-  <!-- Elements of selected page -->
-  <div class="elements-section">
-    <h2>Éléments de la page <span id="list-page-num">1</span></h2>
-    <div id="elements-list"><div class="no-elements">Chargez une page pour voir ses éléments</div></div>
   </div>
 
 </div>
@@ -189,41 +393,38 @@
 <script>
 let currentPage = 1;
 const API = 'http://localhost:3001/api';
-
 const typeIcons = { note: '📝', audio: '🔊', image: '🖼', link: '🔗' };
 const typeNames = { note: 'Note', audio: 'Audio', image: 'Image', link: 'Lien' };
 
 function onTypeChange() {
   const t = document.getElementById('el-type').value;
   document.getElementById('file-upload-row').style.display = (t === 'audio' || t === 'image') ? '' : 'none';
-  document.getElementById('url-row').style.display          = (t === 'link'  || t === 'image') ? '' : 'none';
+  document.getElementById('url-row').style.display = (t === 'link' || t === 'image') ? '' : 'none';
 }
 
 async function loadPage() {
   const p = parseInt(document.getElementById('page-input').value);
-  if (p < 1 || p > 604) return toast('Page invalide (1-604)');
+  if (p < 1 || p > 485) return toast('⚠ Page invalide (1–485)');
   currentPage = p;
-  document.getElementById('page-badge').textContent    = `Page ${p}`;
+  document.getElementById('page-badge').innerHTML = `Page <strong>${p}</strong> / 485`;
   document.getElementById('form-page-num').textContent = p;
   document.getElementById('list-page-num').textContent = p;
   await renderElements();
 }
 
 async function renderElements() {
-  const res  = await fetch(`${API}/elements/${currentPage}`);
+  const res = await fetch(`${API}/elements/${currentPage}`);
   const list = await res.json();
-  const el   = document.getElementById('elements-list');
-
+  const el = document.getElementById('elements-list');
   if (list.length === 0) {
     el.innerHTML = '<div class="no-elements">Aucun élément pour cette page</div>';
     return;
   }
-
   el.innerHTML = list.map(e => `
     <div class="el-card" id="card-${e.id}">
       <div class="el-icon">${typeIcons[e.type] || '?'}</div>
       <div class="el-info">
-        <div class="el-type">${typeNames[e.type] || e.type}</div>
+        <div class="el-badge">${typeNames[e.type] || e.type}</div>
         ${e.title   ? `<div class="el-title">${esc(e.title)}</div>` : ''}
         ${e.content ? `<div class="el-content">${esc(e.content)}</div>` : ''}
         ${e.url     ? `<div class="el-url">${esc(e.url)}</div>` : ''}
@@ -239,23 +440,16 @@ async function addElement() {
   const content = document.getElementById('el-content').value.trim();
   const url     = document.getElementById('el-url').value.trim();
   const file    = document.getElementById('el-file').files[0];
-
   const fd = new FormData();
-  fd.append('type', type);
-  fd.append('title', title);
-  fd.append('content', content);
-  if (file)      fd.append('file', file);
-  else if (url)  fd.append('url', url);
-
+  fd.append('type', type); fd.append('title', title); fd.append('content', content);
+  if (file) fd.append('file', file);
+  else if (url) fd.append('url', url);
   await fetch(`${API}/elements/${currentPage}`, { method: 'POST', body: fd });
-
-  // Reset form
-  document.getElementById('el-title').value   = '';
+  document.getElementById('el-title').value = '';
   document.getElementById('el-content').value = '';
-  document.getElementById('el-url').value     = '';
-  document.getElementById('el-file').value    = '';
-
-  toast('Élément ajouté ✓');
+  document.getElementById('el-url').value = '';
+  document.getElementById('el-file').value = '';
+  toast('✓ Élément ajouté');
   await renderElements();
   await loadOverview();
 }
@@ -269,16 +463,19 @@ async function deleteElement(id) {
 }
 
 async function loadOverview() {
-  const res   = await fetch(`${API}/pages`);
+  const res = await fetch(`${API}/pages`);
   const pages = await res.json();
-  const grid  = document.getElementById('pages-grid');
+  const grid = document.getElementById('pages-grid');
+  const count = document.getElementById('overview-count');
   if (pages.length === 0) {
-    grid.innerHTML = '<em style="color:#aaa;font-size:13px">Aucune page</em>';
+    grid.innerHTML = '<span class="no-pages">Aucune annotation pour l\'instant</span>';
+    count.textContent = '';
     return;
   }
+  count.textContent = `${pages.length} page${pages.length > 1 ? 's' : ''}`;
   grid.innerHTML = pages
-    .sort((a,b) => a.page - b.page)
-    .map(p => `<button class="page-chip" onclick="jumpTo(${p.page})">P${p.page} (${p.count})</button>`)
+    .sort((a, b) => a.page - b.page)
+    .map(p => `<button class="page-chip" onclick="jumpTo(${p.page})">P${p.page} · ${p.count}</button>`)
     .join('');
 }
 
@@ -291,79 +488,54 @@ function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+  setTimeout(() => t.classList.remove('show'), 2800);
 }
 
 function esc(s) {
-  return String(s)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// Init
 loadOverview();
 
-// ── Publier sur GitHub ────────────────────────────────────────────────────────
+// ── Publier sur GitHub ─────────────────────────────────────────────────────
 const GH_OWNER = 'amnayelamri';
 const GH_REPO  = 'quran-pwa';
 const GH_FILE  = 'data/elements.json';
 
 async function publishToGitHub() {
-  const token = localStorage.getItem('gh-token');
+  let token = localStorage.getItem('gh-token');
   if (!token) {
-    const t = prompt('Entrez votre GitHub Token (ghp_...) :\n(il sera sauvegardé localement)');
-    if (!t) return;
-    localStorage.setItem('gh-token', t.trim());
-    return publishToGitHub();
+    token = prompt('GitHub Token (ghp_...) — sera sauvegardé localement :');
+    if (!token) return;
+    localStorage.setItem('gh-token', token.trim());
   }
-
   const btn = document.getElementById('publish-btn');
   btn.disabled = true;
-  btn.textContent = '⏳ Publication...';
-
+  btn.innerHTML = '<span>⏳</span> Publication...';
   try {
     const headers = {
       Authorization: `token ${token}`,
       Accept: 'application/vnd.github.v3+json',
       'Content-Type': 'application/json'
     };
-
-    // Récupérer le SHA actuel du fichier (nécessaire pour le mettre à jour)
     let sha = '';
     const getRes = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`, { headers });
-    if (getRes.ok) {
-      const meta = await getRes.json();
-      sha = meta.sha;
-    }
+    if (getRes.ok) sha = (await getRes.json()).sha;
 
-    // Lire le contenu actuel de elements.json depuis le serveur local
-    const dataRes = await fetch('/api/all-elements');
-    const data = await dataRes.json();
+    const data = await (await fetch('/api/all-elements')).json();
     const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
-
-    // Pousser sur GitHub
-    const body = JSON.stringify({
-      message: `Mise à jour des éléments - ${new Date().toLocaleString('fr-FR')}`,
-      content,
-      sha: sha || undefined
-    });
-
     const putRes = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`, {
-      method: 'PUT', headers, body
+      method: 'PUT', headers,
+      body: JSON.stringify({ message: `Annotations — ${new Date().toLocaleString('fr-FR')}`, content, sha: sha || undefined })
     });
-
-    if (!putRes.ok) {
-      const err = await putRes.json();
-      throw new Error(err.message);
-    }
-
-    toast('✅ Publié sur GitHub ! Visible sur téléphone dans ~1 min');
-  } catch (e) {
-    toast('❌ Erreur : ' + e.message);
+    if (!putRes.ok) throw new Error((await putRes.json()).message);
+    toast('✅ Publié ! Visible sur téléphone dans ~1 min');
+  } catch(e) {
+    toast('❌ ' + e.message);
     if (e.message.includes('Bad credentials')) localStorage.removeItem('gh-token');
   } finally {
     btn.disabled = false;
-    btn.textContent = '⬆ Publier sur GitHub';
+    btn.innerHTML = '<span>⬆</span> Publier sur GitHub';
   }
 }
 </script>

@@ -1,5 +1,5 @@
-const CACHE = 'quran-pwa-v4';
-const STATIC = ['/', '/index.html', '/style.css', '/app.js', '/manifest.json'];
+const CACHE = 'quran-pwa-v5';
+const STATIC = ['/', '/index.html', '/style.css', '/app.js', '/manifest.json', '/icons/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(STATIC)));

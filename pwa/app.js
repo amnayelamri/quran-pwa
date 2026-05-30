@@ -302,6 +302,22 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
+// ── Bannière iOS ─────────────────────────────────────────────────────────────
+function showIOSBanner() {
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone = window.navigator.standalone === true;
+  const dismissed = localStorage.getItem('ios-banner-dismissed');
+  if (!isIOS || isStandalone || dismissed) return;
+
+  const banner = document.getElementById('ios-banner');
+  banner.classList.remove('hidden');
+  document.getElementById('ios-banner-close').addEventListener('click', () => {
+    banner.classList.add('hidden');
+    localStorage.setItem('ios-banner-dismissed', '1');
+  });
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 loadPage(currentPage);
 showHint();
+showIOSBanner();
