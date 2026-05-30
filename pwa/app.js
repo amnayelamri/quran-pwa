@@ -80,16 +80,40 @@ function goTo(newPage, direction /* 'up'|'down' */) {
 
   isAnimating = true;
 
-  // Animate track
+  // L'image qui va devenir visible est déjà pré-chargée dans imgNext ou imgPrev
+  const incomingImg = direction === 'down' ? imgNext : imgPrev;
+
+  // S'assurer que l'image de destination est chargée
+  incomingImg.src = PAGE_IMG_URL(newPage);
+
   const offset = direction === 'down' ? '-100%' : '100%';
-  quranTrack.style.transition = 'transform 0.35s cubic-bezier(0.25,0.46,0.45,0.94)';
+  quranTrack.style.transition = 'transform 0.32s cubic-bezier(0.25,0.46,0.45,0.94)';
   quranTrack.style.transform = `translateY(${offset})`;
 
   quranTrack.addEventListener('transitionend', function handler() {
     quranTrack.removeEventListener('transitionend', handler);
+
+    // Copier l'image déjà visible dans imgCurr AVANT de reset le transform
+    // → aucun flash, aucun saut de layout
+    imgCurr.src = incomingImg.src;
+    imgCurr.style.opacity = '1';
+    imgCurr.style.transition = '';
+    spinner.classList.add('hidden');
+
+    // Reset position (imgCurr montre déjà la bonne image, invisible pendant le reset)
     quranTrack.style.transition = 'none';
     quranTrack.style.transform = '';
-    loadPage(newPage);
+
+    // Mise à jour état
+    currentPage = newPage;
+    pageNumber.textContent = newPage;
+    document.title = `القرآن - صفحة ${newPage}`;
+    localStorage.setItem('quran-page', newPage);
+
+    // Pré-charger les voisins
+    if (newPage > 1)           imgPrev.src = PAGE_IMG_URL(newPage - 1);
+    if (newPage < TOTAL_PAGES) imgNext.src = PAGE_IMG_URL(newPage + 1);
+
     isAnimating = false;
   });
 }
