@@ -93,28 +93,30 @@ function goTo(newPage, direction /* 'up'|'down' */) {
   quranTrack.addEventListener('transitionend', function handler() {
     quranTrack.removeEventListener('transitionend', handler);
 
-    // Copier l'image déjà visible dans imgCurr AVANT de reset le transform
-    // → aucun flash, aucun saut de layout
+    // 1. Copier l'image visible dans imgCurr (pas encore visible, masquée par le transform)
     imgCurr.src = incomingImg.src;
     imgCurr.style.opacity = '1';
     imgCurr.style.transition = '';
     spinner.classList.add('hidden');
 
-    // Reset position (imgCurr montre déjà la bonne image, invisible pendant le reset)
-    quranTrack.style.transition = 'none';
-    quranTrack.style.transform = '';
+    // 2. Double rAF : garantit que le GPU a fini de peindre l'image avant le reset
+    //    (corrige le flash en mode standalone iOS)
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        quranTrack.style.transition = 'none';
+        quranTrack.style.transform = '';
 
-    // Mise à jour état
-    currentPage = newPage;
-    pageNumber.textContent = newPage;
-    document.title = `القرآن - صفحة ${newPage}`;
-    localStorage.setItem('quran-page', newPage);
+        currentPage = newPage;
+        pageNumber.textContent = newPage;
+        document.title = `القرآن - صفحة ${newPage}`;
+        localStorage.setItem('quran-page', newPage);
 
-    // Pré-charger les voisins
-    if (newPage > 1)           imgPrev.src = PAGE_IMG_URL(newPage - 1);
-    if (newPage < TOTAL_PAGES) imgNext.src = PAGE_IMG_URL(newPage + 1);
+        if (newPage > 1)           imgPrev.src = PAGE_IMG_URL(newPage - 1);
+        if (newPage < TOTAL_PAGES) imgNext.src = PAGE_IMG_URL(newPage + 1);
 
-    isAnimating = false;
+        isAnimating = false;
+      });
+    });
   });
 }
 

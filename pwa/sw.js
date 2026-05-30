@@ -1,4 +1,4 @@
-const CACHE = 'quran-pwa-v7';
+const CACHE = 'quran-pwa-v8';
 const BASE = '/quran-pwa/pwa';
 const STATIC = [
   `${BASE}/index.html`,

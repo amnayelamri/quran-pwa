@@ -61,6 +61,9 @@ body::before {
   overflow: hidden;
   position: relative;
   z-index: 1;
+  /* Safe area iOS standalone (notch + home indicator) */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* ── Header ── */
