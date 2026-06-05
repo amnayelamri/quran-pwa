@@ -128,6 +128,12 @@ app.post('/api/import', (req, res) => {
   res.json({ ok: true, added, pages: Object.keys(incoming).length });
 });
 
+// DELETE all elements (toutes pages)
+app.delete('/api/delete-all', (_req, res) => {
+  writeDB({});
+  res.json({ ok: true });
+});
+
 // DELETE element
 app.delete('/api/elements/:page/:id', (req, res) => {
   const db   = readDB();
