@@ -16,8 +16,14 @@ if (!fs.existsSync(DATA_DIR))  fs.mkdirSync(DATA_DIR,  { recursive: true });
 if (!fs.existsSync(UPLOADS))   fs.mkdirSync(UPLOADS,   { recursive: true });
 if (!fs.existsSync(DB_FILE))   fs.writeFileSync(DB_FILE, '{}');
 
-function readDB()       { return JSON.parse(fs.readFileSync(DB_FILE, 'utf8')); }
-function writeDB(data)  { fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2)); }
+function readDB() {
+  const raw = fs.readFileSync(DB_FILE, 'utf8').replace(/^﻿/, '').trim();
+  return raw ? JSON.parse(raw) : {};
+}
+function writeDB(data) {
+  // Toujours écrire sans BOM
+  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), { encoding: 'utf8' });
+}
 
 // ── Multer (file uploads) ─────────────────────────────────────────────────────
 const storage = multer.diskStorage({
