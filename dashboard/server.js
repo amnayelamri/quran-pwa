@@ -89,6 +89,39 @@ app.post('/api/elements/:page', upload.single('file'), (req, res) => {
   res.json(element);
 });
 
+// POST import JSON — fusionne avec les données existantes
+app.post('/api/import', (req, res) => {
+  const incoming = req.body;
+  if (!incoming || typeof incoming !== 'object') {
+    return res.status(400).json({ error: 'JSON invalide' });
+  }
+
+  const db = readDB();
+  let added = 0;
+
+  for (const [page, elements] of Object.entries(incoming)) {
+    if (!Array.isArray(elements)) continue;
+    if (!db[page]) db[page] = [];
+
+    for (const el of elements) {
+      // Générer un id unique si absent
+      const element = {
+        id:        Date.now().toString() + Math.random().toString(36).slice(2),
+        type:      el.type    || 'note',
+        title:     el.title   || '',
+        content:   el.content || '',
+        url:       el.url     || '',
+        createdAt: el.createdAt || new Date().toISOString()
+      };
+      db[page].push(element);
+      added++;
+    }
+  }
+
+  writeDB(db);
+  res.json({ ok: true, added, pages: Object.keys(incoming).length });
+});
+
 // DELETE element
 app.delete('/api/elements/:page/:id', (req, res) => {
   const db   = readDB();

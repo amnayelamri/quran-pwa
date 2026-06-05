@@ -1,25 +1,22 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard — القرآن الكريم</title>
+  <title>لوحة التحكم — القرآن الكريم</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --green:   #1a4a2e;
-      --green2:  #0f2d1b;
-      --green3:  #112a1e;
+      --bg:      #f7f7f7;
+      --surface: #ffffff;
+      --border:  #e2e2e2;
+      --text:    #1a1a1a;
+      --muted:   #888;
+      --accent:  #1a4a2e;
+      --accent2: #236b3f;
       --gold:    #c8a951;
-      --gold2:   #e8c97a;
-      --bg:      #0e1f14;
-      --surface: #132b1c;
-      --surface2:#1a3824;
-      --border:  rgba(200,169,81,0.18);
-      --text:    #f0e6c8;
-      --muted:   rgba(240,230,200,0.55);
-      --red:     #c0392b;
+      --red:     #d32f2f;
     }
 
     body {
@@ -27,365 +24,428 @@
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-    }
-
-    /* motif géométrique fond */
-    body::before {
-      content: '';
-      position: fixed; inset: 0; pointer-events: none; z-index: 0;
-      background-image:
-        repeating-linear-gradient(60deg,  transparent, transparent 34px, rgba(200,169,81,0.03) 34px, rgba(200,169,81,0.03) 35px),
-        repeating-linear-gradient(-60deg, transparent, transparent 34px, rgba(200,169,81,0.03) 34px, rgba(200,169,81,0.03) 35px);
+      font-size: 14px;
     }
 
     /* ── Header ── */
     header {
-      position: relative; z-index: 1;
-      background: linear-gradient(135deg, #0a1d0f 0%, #1a4a2e 50%, #0a1d0f 100%);
-      padding: 0 32px;
-      height: 68px;
-      display: flex; align-items: center; gap: 20px;
+      background: var(--surface);
       border-bottom: 1px solid var(--border);
-      box-shadow: 0 4px 30px rgba(0,0,0,0.5);
-    }
-    header::after {
-      content: '';
-      position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
-      background: linear-gradient(90deg, transparent, var(--gold) 25%, var(--gold2) 50%, var(--gold) 75%, transparent);
-    }
-
-    .header-logo {
-      font-size: 26px;
-      line-height: 1;
-      filter: drop-shadow(0 0 8px rgba(200,169,81,0.5));
-    }
-    .header-title { flex: 1; }
-    .header-title h1 {
-      font-size: 17px; font-weight: 600;
-      color: var(--gold); letter-spacing: 0.5px;
-    }
-    .header-title p {
-      font-size: 12px; color: var(--muted); margin-top: 2px;
+      padding: 0 32px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
     }
 
-    .publish-btn {
-      display: flex; align-items: center; gap: 8px;
-      background: linear-gradient(135deg, var(--gold), var(--gold2));
-      color: #0a1d0f; border: none;
-      padding: 10px 20px; border-radius: 10px;
-      font-weight: 700; font-size: 13px;
-      cursor: pointer; white-space: nowrap;
-      box-shadow: 0 4px 14px rgba(200,169,81,0.25);
-      transition: all 0.2s;
+    .header-brand {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    .publish-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(200,169,81,0.35); }
-    .publish-btn:disabled { opacity: 0.5; cursor: wait; transform: none; }
+    .header-brand span { font-size: 20px; }
+
+    .header-actions { display: flex; gap: 10px; align-items: center; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 16px; border-radius: 6px;
+      font-size: 13px; font-weight: 600;
+      cursor: pointer; border: 1px solid transparent;
+      transition: all 0.15s; white-space: nowrap;
+      font-family: inherit;
+    }
+    .btn-outline {
+      background: var(--surface);
+      border-color: var(--border);
+      color: var(--text);
+    }
+    .btn-outline:hover { border-color: #aaa; background: #f0f0f0; }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .btn-primary:hover { background: var(--accent2); }
+    .btn-primary:disabled { opacity: 0.5; cursor: wait; }
 
     /* ── Layout ── */
-    .container {
-      position: relative; z-index: 1;
-      max-width: 960px; margin: 0 auto; padding: 28px 24px;
+    .page {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 32px 24px;
       display: grid;
-      grid-template-columns: 300px 1fr;
-      grid-template-rows: auto auto 1fr;
-      gap: 20px;
+      grid-template-columns: 1fr 320px;
+      gap: 24px;
+      align-items: start;
     }
 
-    /* ── Cards ── */
+    /* ── Section title ── */
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .section-head h2 {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .section-head .count {
+      font-size: 13px;
+      color: var(--muted);
+      background: #efefef;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    /* ── Page selector tabs ── */
+    .page-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .page-tabs label {
+      font-size: 13px;
+      color: var(--muted);
+      margin-left: 4px;
+    }
+    .page-tabs input[type=number] {
+      width: 72px; padding: 7px 10px;
+      border: 1px solid var(--border); border-radius: 6px;
+      font-size: 14px; text-align: center;
+      outline: none; font-family: inherit;
+    }
+    .page-tabs input:focus { border-color: var(--accent); }
+
+    /* ── Cards (elements list) ── */
+    .el-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .el-card:hover { border-color: #ccc; }
+
+    .el-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: #f0f0f0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; flex-shrink: 0;
+    }
+    .el-info { flex: 1; min-width: 0; }
+    .el-badge {
+      display: inline-block;
+      font-size: 10px; font-weight: 700;
+      color: var(--accent);
+      background: rgba(26,74,46,0.08);
+      padding: 2px 8px; border-radius: 20px;
+      margin-bottom: 4px; letter-spacing: 0.5px;
+    }
+    .el-title { font-weight: 600; margin-bottom: 3px; }
+    .el-content { font-size: 13px; color: var(--muted); line-height: 1.5; }
+    .el-url { font-size: 12px; color: var(--accent); word-break: break-all; margin-top: 3px; }
+
+    .el-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .del-btn {
+      width: 30px; height: 30px; border-radius: 6px;
+      background: none; border: 1px solid #eee;
+      color: var(--red); cursor: pointer; font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .del-btn:hover { background: #ffeaea; border-color: #ffcdd2; }
+
+    .no-elements {
+      text-align: center; padding: 48px 20px;
+      color: var(--muted); font-size: 14px;
+    }
+
+    /* ── Chips pages annotées ── */
+    .pages-chips { display: flex; flex-wrap: wrap; gap: 6px; min-height: 28px; }
+    .page-chip {
+      background: #f0f0f0; border: 1px solid var(--border);
+      color: var(--text); padding: 4px 12px;
+      border-radius: 20px; font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .page-chip:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    /* ── Sidebar ── */
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 10px;
       overflow: hidden;
     }
-    .card-header {
-      padding: 16px 20px 12px;
+    .card-head {
+      padding: 14px 18px;
       border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; gap: 10px;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
-    .card-header .icon {
-      width: 32px; height: 32px; border-radius: 8px;
-      background: rgba(200,169,81,0.12);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
-    }
-    .card-header h2 {
-      font-size: 14px; font-weight: 600;
-      color: var(--gold); letter-spacing: 0.5px;
-    }
-    .card-header span { font-size: 12px; color: var(--muted); }
-    .card-body { padding: 18px 20px; }
+    .card-body { padding: 18px; }
 
-    /* ── Overview (full width) ── */
-    .overview { grid-column: 1 / -1; }
-    .pages-grid { display: flex; flex-wrap: wrap; gap: 8px; min-height: 32px; }
-    .page-chip {
-      background: rgba(200,169,81,0.1);
-      border: 1px solid rgba(200,169,81,0.3);
-      color: var(--gold2);
-      padding: 5px 14px; border-radius: 20px;
-      font-size: 12px; font-weight: 600;
-      cursor: pointer; transition: all 0.2s;
-    }
-    .page-chip:hover { background: rgba(200,169,81,0.2); transform: translateY(-1px); }
-    .no-pages { color: var(--muted); font-size: 13px; font-style: italic; }
-
-    /* ── Sidebar (left column) ── */
-    .sidebar { grid-column: 1; display: flex; flex-direction: column; gap: 20px; }
-
-    /* Page selector */
-    .page-nav {
-      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-    }
-    .page-nav input {
-      width: 80px; padding: 10px 12px;
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 10px; color: var(--text);
-      font-size: 16px; text-align: center; outline: none;
-      transition: border-color 0.2s;
-    }
-    .page-nav input:focus { border-color: var(--gold); }
-    .page-nav button {
-      flex: 1; padding: 10px 16px;
-      background: var(--green); color: var(--gold);
-      border: 1px solid rgba(200,169,81,0.3);
-      border-radius: 10px; font-weight: 600; font-size: 14px;
-      cursor: pointer; transition: all 0.2s;
-    }
-    .page-nav button:hover { background: #1f5a37; }
-    #page-badge {
-      width: 100%; text-align: center;
-      font-size: 13px; color: var(--muted);
-      padding: 6px 0 0;
-    }
-    #page-badge strong { color: var(--gold); }
-
-    /* Add form */
+    /* ── Form ── */
     .form-group { margin-bottom: 14px; }
     .form-group label {
-      display: block; font-size: 11px; font-weight: 600;
-      color: var(--muted); text-transform: uppercase;
-      letter-spacing: 1px; margin-bottom: 6px;
+      display: block; font-size: 12px; font-weight: 600;
+      color: var(--muted); margin-bottom: 5px;
+      text-transform: uppercase; letter-spacing: 0.5px;
     }
     .form-group select,
     .form-group input[type=text],
     .form-group textarea {
-      width: 100%; padding: 10px 13px;
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 10px; color: var(--text);
-      font-size: 14px; outline: none;
-      transition: border-color 0.2s;
-      font-family: inherit;
+      width: 100%; padding: 9px 12px;
+      border: 1px solid var(--border); border-radius: 6px;
+      font-size: 14px; font-family: inherit;
+      outline: none; transition: border-color 0.15s;
+      background: #fff;
     }
     .form-group select:focus,
     .form-group input:focus,
-    .form-group textarea:focus { border-color: var(--gold); }
-    .form-group select { cursor: pointer; }
-    textarea { resize: vertical; min-height: 75px; line-height: 1.5; }
+    .form-group textarea:focus { border-color: var(--accent); }
+    textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
     .form-group input[type=file] {
       width: 100%; padding: 8px;
-      background: var(--surface2); border: 1px dashed rgba(200,169,81,0.3);
-      border-radius: 10px; color: var(--muted);
-      font-size: 13px; cursor: pointer;
+      border: 1px dashed var(--border); border-radius: 6px;
+      font-size: 13px; cursor: pointer; color: var(--muted);
     }
     #file-upload-row, #url-row { display: none; }
 
-    .add-btn {
-      width: 100%; padding: 12px;
-      background: linear-gradient(135deg, var(--green), #236b3f);
-      border: 1px solid rgba(200,169,81,0.3);
-      color: var(--gold); border-radius: 10px;
-      font-size: 14px; font-weight: 700;
-      cursor: pointer; letter-spacing: 0.5px;
-      transition: all 0.2s; margin-top: 4px;
+    /* ── JSON reference box ── */
+    .json-ref {
+      background: #1e1e1e;
+      border-radius: 8px;
+      padding: 16px;
+      position: relative;
     }
-    .add-btn:hover { background: linear-gradient(135deg, #236b3f, #2a7a48); transform: translateY(-1px); }
+    .json-ref pre {
+      color: #d4d4d4;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 11px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .json-ref .copy-btn {
+      position: absolute; top: 10px; left: 10px;
+      background: #333; border: 1px solid #555;
+      color: #ccc; padding: 4px 10px;
+      border-radius: 4px; font-size: 11px;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .json-ref .copy-btn:hover { background: #444; color: #fff; }
+    .json-key   { color: #9cdcfe; }
+    .json-str   { color: #ce9178; }
+    .json-num   { color: #b5cea8; }
+    .json-bool  { color: #569cd6; }
 
-    /* ── Main area (elements list) ── */
-    .main-area { grid-column: 2; }
-    .el-card {
-      background: var(--surface2);
+    /* ── Modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 999; backdrop-filter: blur(3px);
+    }
+    .modal-overlay.hidden { display: none; }
+    .modal-box {
+      background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px; padding: 16px;
-      margin-bottom: 12px;
-      display: flex; gap: 14px; align-items: flex-start;
-      transition: border-color 0.2s;
-      position: relative; overflow: hidden;
+      border-radius: 12px;
+      padding: 28px; width: 540px; max-width: 95vw;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.15);
     }
-    .el-card::before {
-      content: '';
-      position: absolute; top: 0; left: 0;
-      width: 3px; height: 100%;
-      background: linear-gradient(180deg, var(--gold2), var(--gold));
+    .modal-box h3 { font-size: 16px; margin-bottom: 6px; }
+    .modal-box p  { font-size: 13px; color: var(--muted); margin-bottom: 14px; line-height: 1.6; }
+    .modal-box textarea {
+      width: 100%; height: 220px; padding: 12px;
+      background: #1e1e1e; border: 1px solid #444;
+      border-radius: 8px; color: #d4d4d4;
+      font-family: 'Consolas', monospace; font-size: 12px;
+      resize: vertical; outline: none; line-height: 1.5;
+      direction: ltr;
     }
-    .el-card:hover { border-color: rgba(200,169,81,0.35); }
+    .modal-actions { display: flex; gap: 10px; margin-top: 14px; justify-content: flex-end; }
 
-    .el-icon {
-      width: 40px; height: 40px; border-radius: 10px;
-      background: rgba(200,169,81,0.1);
-      border: 1px solid rgba(200,169,81,0.2);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px; flex-shrink: 0; margin-left: 6px;
+    .import-result {
+      margin-top: 10px; padding: 10px 14px;
+      border-radius: 6px; font-size: 13px; font-weight: 600;
+      display: none;
     }
-    .el-info { flex: 1; min-width: 0; }
-    .el-info .el-badge {
-      display: inline-block; font-size: 10px; font-weight: 700;
-      color: var(--gold); background: rgba(200,169,81,0.1);
-      border: 1px solid rgba(200,169,81,0.2);
-      padding: 2px 8px; border-radius: 20px;
-      text-transform: uppercase; letter-spacing: 1px;
-      margin-bottom: 5px;
-    }
-    .el-info .el-title {
-      font-weight: 600; font-size: 15px; color: var(--text);
-      margin-bottom: 4px; white-space: nowrap;
-      overflow: hidden; text-overflow: ellipsis;
-    }
-    .el-info .el-content { font-size: 13px; color: var(--muted); line-height: 1.6; }
-    .el-info .el-url {
-      font-size: 12px; color: var(--gold2);
-      word-break: break-all; margin-top: 4px;
-    }
-
-    .del-btn {
-      background: rgba(192,57,43,0.1); border: 1px solid rgba(192,57,43,0.2);
-      color: var(--red); cursor: pointer;
-      width: 32px; height: 32px; border-radius: 8px;
-      font-size: 18px; line-height: 1;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; transition: all 0.2s;
-    }
-    .del-btn:hover { background: rgba(192,57,43,0.25); }
-
-    .no-elements {
-      text-align: center; padding: 50px 20px;
-      color: var(--muted); font-size: 14px;
-    }
-    .no-elements::before {
-      content: '✦';
-      display: block; font-size: 30px; margin-bottom: 14px;
-      color: rgba(200,169,81,0.2);
-    }
+    .import-result.ok  { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+    .import-result.err { background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
 
     /* ── Toast ── */
     .toast {
-      position: fixed; bottom: 28px; left: 50%;
+      position: fixed; bottom: 24px; left: 50%;
       transform: translateX(-50%);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 12px 24px; border-radius: 30px;
-      font-size: 14px; font-weight: 500;
-      opacity: 0; transition: opacity 0.3s;
-      pointer-events: none; z-index: 999;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-      white-space: nowrap;
+      background: #1a1a1a; color: #fff;
+      padding: 10px 22px; border-radius: 8px;
+      font-size: 13px; opacity: 0;
+      transition: opacity 0.3s; pointer-events: none;
+      z-index: 9999; white-space: nowrap;
     }
     .toast.show { opacity: 1; }
 
-    @media (max-width: 700px) {
-      .container { grid-template-columns: 1fr; }
-      .overview, .main-area { grid-column: 1; }
+    @media (max-width: 720px) {
+      .page { grid-template-columns: 1fr; }
       header { padding: 0 16px; }
     }
   </style>
 </head>
 <body>
 
+<!-- Header -->
 <header>
-  <div class="header-logo">☽</div>
-  <div class="header-title">
-    <h1>Dashboard — القرآن الكريم</h1>
-    <p>Gérez les annotations par page du mushaf</p>
+  <div class="header-brand">
+    <span>☽</span> لوحة التحكم — القرآن الكريم
   </div>
-  <button class="publish-btn" id="publish-btn" onclick="publishToGitHub()">
-    <span>⬆</span> Publier sur GitHub
-  </button>
+  <div class="header-actions">
+    <button class="btn btn-outline" onclick="openImport()">⬇ استيراد JSON</button>
+    <button class="btn btn-primary" id="publish-btn" onclick="publishToGitHub()">⬆ نشر على GitHub</button>
+  </div>
 </header>
 
-<div class="container">
-
-  <!-- Vue d'ensemble -->
-  <div class="card overview">
-    <div class="card-header">
-      <div class="icon">📖</div>
-      <h2>Pages annotées</h2>
-      <span id="overview-count"></span>
+<!-- Modal Import -->
+<div class="modal-overlay hidden" id="import-modal">
+  <div class="modal-box">
+    <h3>⬇ استيراد عناصر من JSON</h3>
+    <p>الصق كائن JSON يحتوي على أرقام الصفحات كمفاتيح وقائمة العناصر كقيم. ستُضاف العناصر دون حذف الموجودة.</p>
+    <textarea id="import-textarea" dir="ltr" placeholder='{ "1": [{"type":"note","title":"...","content":"..."}] }'></textarea>
+    <div class="import-result" id="import-result"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeImport()">إلغاء</button>
+      <button class="btn btn-primary" onclick="doImport()">⬇ استيراد</button>
     </div>
-    <div class="card-body">
-      <div class="pages-grid" id="pages-grid">
-        <span class="no-pages">Aucune annotation pour l'instant</span>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="page">
+
+  <!-- Left: elements list -->
+  <div>
+    <!-- Overview -->
+    <div class="section-head" style="margin-bottom:14px">
+      <h2>الصفحات المضافة</h2>
+      <span class="count" id="overview-count">—</span>
+    </div>
+    <div class="pages-chips" id="pages-grid" style="margin-bottom:28px">
+      <span style="color:var(--muted);font-size:13px">لا توجد صفحات بعد</span>
+    </div>
+
+    <!-- Page selector -->
+    <div class="section-head">
+      <h2>عناصر الصفحة <span id="list-page-num" style="color:var(--accent)">1</span></h2>
+      <div class="page-tabs">
+        <label>الصفحة</label>
+        <input type="number" id="page-input" min="1" max="485" value="1"/>
+        <button class="btn btn-outline" onclick="loadPage()">تحميل</button>
       </div>
+    </div>
+
+    <div id="elements-list">
+      <div class="no-elements">اختر صفحة لعرض عناصرها</div>
     </div>
   </div>
 
-  <!-- Colonne gauche -->
+  <!-- Right: sidebar -->
   <div class="sidebar">
 
-    <!-- Sélecteur de page -->
+    <!-- Add element -->
     <div class="card">
-      <div class="card-header">
-        <div class="icon">🔢</div>
-        <h2>Page du mushaf</h2>
-      </div>
-      <div class="card-body">
-        <div class="page-nav">
-          <input type="number" id="page-input" min="1" max="485" value="1"/>
-          <button onclick="loadPage()">Charger</button>
-        </div>
-        <div id="page-badge">Page <strong>1</strong> / 485</div>
-      </div>
-    </div>
-
-    <!-- Formulaire d'ajout -->
-    <div class="card">
-      <div class="card-header">
-        <div class="icon">＋</div>
-        <h2>Ajouter un élément</h2>
-      </div>
+      <div class="card-head">إضافة عنصر — صفحة <span id="form-page-num">1</span></div>
       <div class="card-body">
         <div class="form-group">
-          <label>Type</label>
+          <label>النوع</label>
           <select id="el-type" onchange="onTypeChange()">
-            <option value="note">📝 Note / Tafsir</option>
-            <option value="audio">🔊 Audio</option>
-            <option value="image">🖼 Image</option>
-            <option value="link">🔗 Lien</option>
+            <option value="note">📝 ملاحظة / تفسير</option>
+            <option value="audio">🔊 صوت</option>
+            <option value="image">🖼 صورة</option>
+            <option value="link">🔗 رابط</option>
           </select>
         </div>
         <div class="form-group">
-          <label>Titre</label>
-          <input type="text" id="el-title" placeholder="Titre (optionnel)"/>
+          <label>العنوان</label>
+          <input type="text" id="el-title" placeholder="العنوان (اختياري)"/>
         </div>
         <div class="form-group">
-          <label>Contenu</label>
-          <textarea id="el-content" placeholder="Texte, description, explication..."></textarea>
+          <label>المحتوى</label>
+          <textarea id="el-content" placeholder="النص أو الشرح..."></textarea>
         </div>
         <div class="form-group" id="url-row">
-          <label>URL</label>
+          <label>الرابط</label>
           <input type="text" id="el-url" placeholder="https://..."/>
         </div>
         <div class="form-group" id="file-upload-row">
-          <label>Fichier</label>
+          <label>الملف</label>
           <input type="file" id="el-file" accept="audio/*,image/*"/>
         </div>
-        <button class="add-btn" onclick="addElement()">＋ Ajouter à la page <span id="form-page-num">1</span></button>
+        <button class="btn btn-primary" style="width:100%" onclick="addElement()">+ إضافة</button>
+      </div>
+    </div>
+
+    <!-- JSON reference -->
+    <div class="card">
+      <div class="card-head">نموذج JSON للاستيراد</div>
+      <div class="card-body" style="padding:12px">
+        <div class="json-ref">
+          <button class="copy-btn" onclick="copyJson()">نسخ</button>
+          <pre id="json-template"><span class="json-key">{</span>
+  <span class="json-key">"1"</span>: [
+    {
+      <span class="json-key">"type"</span>: <span class="json-str">"note"</span>,
+      <span class="json-key">"title"</span>: <span class="json-str">"الفاتحة"</span>,
+      <span class="json-key">"content"</span>: <span class="json-str">"سبع آيات..."</span>
+    }
+  ],
+  <span class="json-key">"19"</span>: [
+    {
+      <span class="json-key">"type"</span>: <span class="json-str">"audio"</span>,
+      <span class="json-key">"title"</span>: <span class="json-str">"تلاوة"</span>,
+      <span class="json-key">"url"</span>: <span class="json-str">"https://..."</span>
+    },
+    {
+      <span class="json-key">"type"</span>: <span class="json-str">"link"</span>,
+      <span class="json-key">"title"</span>: <span class="json-str">"تفسير"</span>,
+      <span class="json-key">"url"</span>: <span class="json-str">"https://..."</span>
+    }
+  ],
+  <span class="json-key">"42"</span>: [
+    {
+      <span class="json-key">"type"</span>: <span class="json-str">"image"</span>,
+      <span class="json-key">"title"</span>: <span class="json-str">"لوحة"</span>,
+      <span class="json-key">"url"</span>: <span class="json-str">"https://..."</span>,
+      <span class="json-key">"content"</span>: <span class="json-str">"وصف..."</span>
+    }
+  ]
+<span class="json-key">}</span></pre>
+        </div>
+        <p style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6;text-align:right">
+          الأنواع المتاحة: <strong>note</strong> · <strong>audio</strong> · <strong>image</strong> · <strong>link</strong><br>
+          الحقول: <strong>type</strong> (إلزامي) · <strong>title</strong> · <strong>content</strong> · <strong>url</strong>
+        </p>
       </div>
     </div>
 
   </div>
-
-  <!-- Zone principale : liste des éléments -->
-  <div class="card main-area">
-    <div class="card-header">
-      <div class="icon">📌</div>
-      <h2>Éléments — page <span id="list-page-num">1</span></h2>
-    </div>
-    <div class="card-body" id="elements-list">
-      <div class="no-elements">Sélectionnez une page pour voir ses éléments</div>
-    </div>
-  </div>
-
 </div>
 
 <div class="toast" id="toast"></div>
@@ -394,7 +454,7 @@
 let currentPage = 1;
 const API = 'http://localhost:3001/api';
 const typeIcons = { note: '📝', audio: '🔊', image: '🖼', link: '🔗' };
-const typeNames = { note: 'Note', audio: 'Audio', image: 'Image', link: 'Lien' };
+const typeNames = { note: 'ملاحظة', audio: 'صوت', image: 'صورة', link: 'رابط' };
 
 function onTypeChange() {
   const t = document.getElementById('el-type').value;
@@ -404,22 +464,23 @@ function onTypeChange() {
 
 async function loadPage() {
   const p = parseInt(document.getElementById('page-input').value);
-  if (p < 1 || p > 485) return toast('⚠ Page invalide (1–485)');
+  if (p < 1 || p > 485) return toast('⚠ رقم الصفحة غير صحيح (1–485)');
   currentPage = p;
-  document.getElementById('page-badge').innerHTML = `Page <strong>${p}</strong> / 485`;
-  document.getElementById('form-page-num').textContent = p;
   document.getElementById('list-page-num').textContent = p;
+  document.getElementById('form-page-num').textContent = p;
   await renderElements();
 }
 
 async function renderElements() {
-  const res = await fetch(`${API}/elements/${currentPage}`);
+  const res  = await fetch(`${API}/elements/${currentPage}`);
   const list = await res.json();
-  const el = document.getElementById('elements-list');
+  const el   = document.getElementById('elements-list');
+
   if (list.length === 0) {
-    el.innerHTML = '<div class="no-elements">Aucun élément pour cette page</div>';
+    el.innerHTML = '<div class="no-elements">لا توجد عناصر لهذه الصفحة</div>';
     return;
   }
+
   el.innerHTML = list.map(e => `
     <div class="el-card" id="card-${e.id}">
       <div class="el-icon">${typeIcons[e.type] || '?'}</div>
@@ -429,7 +490,9 @@ async function renderElements() {
         ${e.content ? `<div class="el-content">${esc(e.content)}</div>` : ''}
         ${e.url     ? `<div class="el-url">${esc(e.url)}</div>` : ''}
       </div>
-      <button class="del-btn" onclick="deleteElement('${e.id}')" title="Supprimer">×</button>
+      <div class="el-actions">
+        <button class="del-btn" onclick="deleteElement('${e.id}')" title="حذف">×</button>
+      </div>
     </div>
   `).join('');
 }
@@ -440,42 +503,50 @@ async function addElement() {
   const content = document.getElementById('el-content').value.trim();
   const url     = document.getElementById('el-url').value.trim();
   const file    = document.getElementById('el-file').files[0];
+
   const fd = new FormData();
-  fd.append('type', type); fd.append('title', title); fd.append('content', content);
+  fd.append('type', type);
+  fd.append('title', title);
+  fd.append('content', content);
   if (file) fd.append('file', file);
   else if (url) fd.append('url', url);
+
   await fetch(`${API}/elements/${currentPage}`, { method: 'POST', body: fd });
-  document.getElementById('el-title').value = '';
+
+  document.getElementById('el-title').value   = '';
   document.getElementById('el-content').value = '';
-  document.getElementById('el-url').value = '';
-  document.getElementById('el-file').value = '';
-  toast('✓ Élément ajouté');
+  document.getElementById('el-url').value     = '';
+  document.getElementById('el-file').value    = '';
+
+  toast('✓ تمت الإضافة');
   await renderElements();
   await loadOverview();
 }
 
 async function deleteElement(id) {
-  if (!confirm('Supprimer cet élément ?')) return;
+  if (!confirm('هل تريد حذف هذا العنصر؟')) return;
   await fetch(`${API}/elements/${currentPage}/${id}`, { method: 'DELETE' });
-  toast('Élément supprimé');
+  toast('تم الحذف');
   await renderElements();
   await loadOverview();
 }
 
 async function loadOverview() {
-  const res = await fetch(`${API}/pages`);
+  const res   = await fetch(`${API}/pages`);
   const pages = await res.json();
-  const grid = document.getElementById('pages-grid');
+  const grid  = document.getElementById('pages-grid');
   const count = document.getElementById('overview-count');
+
   if (pages.length === 0) {
-    grid.innerHTML = '<span class="no-pages">Aucune annotation pour l\'instant</span>';
-    count.textContent = '';
+    grid.innerHTML = '<span style="color:var(--muted);font-size:13px">لا توجد صفحات بعد</span>';
+    count.textContent = '—';
     return;
   }
-  count.textContent = `${pages.length} page${pages.length > 1 ? 's' : ''}`;
+
+  count.textContent = `${pages.length} صفحة`;
   grid.innerHTML = pages
     .sort((a, b) => a.page - b.page)
-    .map(p => `<button class="page-chip" onclick="jumpTo(${p.page})">P${p.page} · ${p.count}</button>`)
+    .map(p => `<button class="page-chip" onclick="jumpTo(${p.page})">ص ${p.page} · ${p.count}</button>`)
     .join('');
 }
 
@@ -488,16 +559,112 @@ function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2800);
+  setTimeout(() => t.classList.remove('show'), 2500);
 }
 
 function esc(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-loadOverview();
+// ── نسخ نموذج JSON ─────────────────────────────────────────────────────────
+function copyJson() {
+  const template = `{
+  "1": [
+    {
+      "type": "note",
+      "title": "الفاتحة",
+      "content": "سبع آيات..."
+    }
+  ],
+  "19": [
+    {
+      "type": "audio",
+      "title": "تلاوة",
+      "url": "https://..."
+    },
+    {
+      "type": "link",
+      "title": "تفسير",
+      "url": "https://..."
+    }
+  ],
+  "42": [
+    {
+      "type": "image",
+      "title": "لوحة",
+      "url": "https://...",
+      "content": "وصف..."
+    }
+  ]
+}`;
+  navigator.clipboard.writeText(template).then(() => toast('✓ تم نسخ النموذج'));
+}
 
-// ── Publier sur GitHub ─────────────────────────────────────────────────────
+// ── استيراد JSON ───────────────────────────────────────────────────────────
+function openImport() {
+  document.getElementById('import-modal').classList.remove('hidden');
+  document.getElementById('import-result').style.display = 'none';
+  document.getElementById('import-textarea').value = '';
+  setTimeout(() => document.getElementById('import-textarea').focus(), 50);
+}
+
+function closeImport() {
+  document.getElementById('import-modal').classList.add('hidden');
+}
+
+async function doImport() {
+  const raw = document.getElementById('import-textarea').value.trim();
+  const resultEl = document.getElementById('import-result');
+
+  let data;
+  try {
+    data = JSON.parse(raw);
+  } catch(e) {
+    resultEl.className = 'import-result err';
+    resultEl.textContent = '❌ JSON غير صحيح: ' + e.message;
+    resultEl.style.display = 'block';
+    return;
+  }
+
+  if (typeof data !== 'object' || Array.isArray(data)) {
+    resultEl.className = 'import-result err';
+    resultEl.textContent = '❌ يجب أن يكون JSON كائناً { "رقم الصفحة": [...] }';
+    resultEl.style.display = 'block';
+    return;
+  }
+
+  try {
+    const res  = await fetch(`${API}/import`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || 'خطأ في الخادم');
+
+    resultEl.className = 'import-result ok';
+    resultEl.textContent = `✓ تمت إضافة ${json.added} عنصر على ${json.pages} صفحة`;
+    resultEl.style.display = 'block';
+
+    await loadOverview();
+    setTimeout(() => {
+      closeImport();
+      if (data[currentPage]) renderElements();
+    }, 2000);
+  } catch(e) {
+    resultEl.className = 'import-result err';
+    resultEl.textContent = '❌ ' + e.message;
+    resultEl.style.display = 'block';
+  }
+}
+
+document.getElementById('import-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeImport();
+});
+
+// ── نشر على GitHub ─────────────────────────────────────────────────────────
 const GH_OWNER = 'amnayelamri';
 const GH_REPO  = 'quran-pwa';
 const GH_FILE  = 'data/elements.json';
@@ -505,39 +672,57 @@ const GH_FILE  = 'data/elements.json';
 async function publishToGitHub() {
   let token = localStorage.getItem('gh-token');
   if (!token) {
-    token = prompt('GitHub Token (ghp_...) — sera sauvegardé localement :');
+    token = prompt('أدخل GitHub Token (ghp_...) — سيتم حفظه محلياً:');
     if (!token) return;
     localStorage.setItem('gh-token', token.trim());
   }
+
   const btn = document.getElementById('publish-btn');
   btn.disabled = true;
-  btn.innerHTML = '<span>⏳</span> Publication...';
+  btn.textContent = '⏳ جاري النشر...';
+
   try {
     const headers = {
       Authorization: `token ${token}`,
       Accept: 'application/vnd.github.v3+json',
       'Content-Type': 'application/json'
     };
+
     let sha = '';
-    const getRes = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`, { headers });
+    const getRes = await fetch(
+      `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`,
+      { headers }
+    );
     if (getRes.ok) sha = (await getRes.json()).sha;
 
-    const data = await (await fetch('/api/all-elements')).json();
+    const data    = await (await fetch('/api/all-elements')).json();
     const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
-    const putRes = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`, {
-      method: 'PUT', headers,
-      body: JSON.stringify({ message: `Annotations — ${new Date().toLocaleString('fr-FR')}`, content, sha: sha || undefined })
-    });
+
+    const putRes = await fetch(
+      `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`,
+      {
+        method: 'PUT', headers,
+        body: JSON.stringify({
+          message: `تحديث العناصر — ${new Date().toLocaleString('ar')}`,
+          content,
+          sha: sha || undefined
+        })
+      }
+    );
+
     if (!putRes.ok) throw new Error((await putRes.json()).message);
-    toast('✅ Publié ! Visible sur téléphone dans ~1 min');
+    toast('✅ تم النشر! سيظهر على الهاتف خلال دقيقة');
   } catch(e) {
     toast('❌ ' + e.message);
     if (e.message.includes('Bad credentials')) localStorage.removeItem('gh-token');
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '<span>⬆</span> Publier sur GitHub';
+    btn.textContent = '⬆ نشر على GitHub';
   }
 }
+
+// ── Init ───────────────────────────────────────────────────────────────────
+loadOverview();
 </script>
 </body>
 </html>
