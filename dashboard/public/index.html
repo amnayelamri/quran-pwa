@@ -327,8 +327,26 @@
 <div class="modal-overlay hidden" id="import-modal">
   <div class="modal-box">
     <h3>⬇ استيراد عناصر من JSON</h3>
-    <p>الصق كائن JSON يحتوي على أرقام الصفحات كمفاتيح وقائمة العناصر كقيم. ستُضاف العناصر دون حذف الموجودة.</p>
-    <textarea id="import-textarea" dir="ltr" placeholder='{ "1": [{"type":"note","title":"...","content":"..."}] }'></textarea>
+    <p>اختر ملف JSON أو الصق المحتوى مباشرة. ستُضاف العناصر دون حذف الموجودة.</p>
+
+    <!-- Zone fichier -->
+    <div id="drop-zone" style="border:2px dashed var(--border);border-radius:8px;padding:28px;text-align:center;cursor:pointer;margin-bottom:12px;transition:all 0.2s" onclick="document.getElementById('file-input').click()" ondragover="onDragOver(event)" ondrop="onDrop(event)">
+      <div style="font-size:28px;margin-bottom:8px">📂</div>
+      <div style="font-weight:600;margin-bottom:4px" id="drop-label">اضغط لاختيار ملف JSON</div>
+      <div style="font-size:12px;color:var(--muted)">أو اسحب الملف هنا</div>
+      <input type="file" id="file-input" accept=".json,application/json" style="display:none" onchange="onFileSelected(event)"/>
+    </div>
+
+    <!-- Séparateur -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+      <span style="font-size:12px;color:var(--muted)">أو الصق النص</span>
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+    </div>
+
+    <!-- Textarea collage -->
+    <textarea id="import-textarea" dir="ltr" style="width:100%;height:120px;padding:12px;background:#1e1e1e;border:1px solid #444;border-radius:8px;color:#d4d4d4;font-family:Consolas,monospace;font-size:12px;resize:vertical;outline:none;direction:ltr" placeholder='{ "1": [{"type":"note","title":"...","content":"..."}] }'></textarea>
+
     <div class="import-result" id="import-result"></div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeImport()">إلغاء</button>
@@ -603,37 +621,91 @@ function copyJson() {
 }
 
 // ── استيراد JSON ───────────────────────────────────────────────────────────
+let importedData = null;
+
 function openImport() {
+  importedData = null;
   document.getElementById('import-modal').classList.remove('hidden');
   document.getElementById('import-result').style.display = 'none';
   document.getElementById('import-textarea').value = '';
-  setTimeout(() => document.getElementById('import-textarea').focus(), 50);
+  document.getElementById('drop-label').textContent = 'اضغط لاختيار ملف JSON';
+  document.getElementById('drop-zone').style.borderColor = 'var(--border)';
+  document.getElementById('drop-zone').style.background = '';
 }
 
 function closeImport() {
   document.getElementById('import-modal').classList.add('hidden');
 }
 
-async function doImport() {
-  const raw = document.getElementById('import-textarea').value.trim();
-  const resultEl = document.getElementById('import-result');
+function onDragOver(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').style.borderColor = 'var(--accent)';
+  document.getElementById('drop-zone').style.background = 'rgba(26,74,46,0.05)';
+}
 
-  let data;
-  try {
-    data = JSON.parse(raw);
-  } catch(e) {
-    resultEl.className = 'import-result err';
-    resultEl.textContent = '❌ JSON غير صحيح: ' + e.message;
-    resultEl.style.display = 'block';
+function onDrop(e) {
+  e.preventDefault();
+  const file = e.dataTransfer.files[0];
+  if (file) loadFile(file);
+}
+
+function onFileSelected(e) {
+  const file = e.target.files[0];
+  if (file) loadFile(file);
+}
+
+function loadFile(file) {
+  if (!file.name.endsWith('.json') && file.type !== 'application/json') {
+    showImportResult('err', '❌ الرجاء اختيار ملف JSON');
     return;
+  }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const content = e.target.result;
+    document.getElementById('import-textarea').value = content.substring(0, 500) + (content.length > 500 ? '\n... (ملف كبير، سيُعالَج كاملاً)' : '');
+    document.getElementById('drop-label').textContent = `✓ ${file.name} (${(file.size/1024).toFixed(0)} KB)`;
+    document.getElementById('drop-zone').style.borderColor = '#4caf7d';
+    document.getElementById('drop-zone').style.background = 'rgba(76,175,80,0.05)';
+    // Stocker les données complètes
+    try {
+      importedData = JSON.parse(content);
+      showImportResult('ok', `✓ ملف صحيح — ${Object.keys(importedData).length} صفحة جاهزة للاستيراد`);
+    } catch(err) {
+      importedData = null;
+      showImportResult('err', '❌ ملف JSON غير صحيح: ' + err.message);
+    }
+  };
+  reader.readAsText(file, 'utf-8');
+}
+
+function showImportResult(type, msg) {
+  const el = document.getElementById('import-result');
+  el.className = 'import-result ' + type;
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+async function doImport() {
+  // Priorité : fichier sélectionné, sinon textarea
+  let data = importedData;
+
+  if (!data) {
+    const raw = document.getElementById('import-textarea').value.trim();
+    if (!raw) { showImportResult('err', '❌ اختر ملفاً أو الصق محتوى JSON'); return; }
+    try {
+      data = JSON.parse(raw);
+    } catch(e) {
+      showImportResult('err', '❌ JSON غير صحيح: ' + e.message);
+      return;
+    }
   }
 
   if (typeof data !== 'object' || Array.isArray(data)) {
-    resultEl.className = 'import-result err';
-    resultEl.textContent = '❌ يجب أن يكون JSON كائناً { "رقم الصفحة": [...] }';
-    resultEl.style.display = 'block';
+    showImportResult('err', '❌ يجب أن يكون JSON كائناً { "رقم الصفحة": [...] }');
     return;
   }
+
+  showImportResult('ok', '⏳ جاري الاستيراد...');
 
   try {
     const res  = await fetch(`${API}/import`, {
@@ -641,22 +713,17 @@ async function doImport() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
+    if (!res.ok) throw new Error(`خطأ ${res.status}`);
     const json = await res.json();
-    if (!res.ok) throw new Error(json.error || 'خطأ في الخادم');
 
-    resultEl.className = 'import-result ok';
-    resultEl.textContent = `✓ تمت إضافة ${json.added} عنصر على ${json.pages} صفحة`;
-    resultEl.style.display = 'block';
-
+    showImportResult('ok', `✓ تمت إضافة ${json.added} عنصر على ${json.pages} صفحة`);
     await loadOverview();
     setTimeout(() => {
       closeImport();
       if (data[currentPage]) renderElements();
     }, 2000);
   } catch(e) {
-    resultEl.className = 'import-result err';
-    resultEl.textContent = '❌ ' + e.message;
-    resultEl.style.display = 'block';
+    showImportResult('err', '❌ ' + e.message + ' — تأكد أن الخادم يعمل على localhost:3001');
   }
 }
 
